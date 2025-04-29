@@ -2,7 +2,6 @@ import jwt
 import os
 from datetime import datetime, timedelta
 from flask import request
-from main import products
 from functools import wraps
 from flask import Flask, jsonify
 
@@ -24,7 +23,7 @@ def token_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# Chave secreta para encriptação (ideal usar variável de ambiente em produção)
+
 SECRET_KEY = os.getenv("SECRET_KEY", "sua-chave-super-secreta")
 
 @app.route("/login", methods=["POST"])
@@ -35,7 +34,7 @@ def login():
     if "username" not in data or "password" not in data:
         return jsonify(message="Campos 'username' e 'password' são obrigatórios!"), 400
     if data["username"] == "admin" and data["password"] == "123":
-        # Gerar o token com expiração
+
         token = jwt.encode(
             {"user": data["username"], "exp": datetime.utcnow() + timedelta(minutes=30)},
             SECRET_KEY,
@@ -47,7 +46,7 @@ def login():
 
 @app.route("/protected", methods=["GET"])
 def protected():
-    # Obtém o token do cabeçalho da requisição
+
     auth_header = request.headers.get("Authorization")
     if not auth_header:
         return jsonify(message="Token é necessário!"), 403
@@ -58,7 +57,7 @@ def protected():
     token = parts[1]
 
     try:
-        # Decodifica o token
+
         decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return jsonify(message=f"Bem-vindo, {decoded['user']}!")
     except jwt.ExpiredSignatureError:
@@ -66,7 +65,7 @@ def protected():
     except jwt.InvalidTokenError:
         return jsonify(message="Token inválido!"), 403
 
-# Rota inicial (hello world)
+
 @app.route("/")
 def home():
     return jsonify(message="Bem-vindo à API segura com JWT!")
